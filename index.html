@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>QUANTUM MACRO | V27 ULTIMATE UNIFIED</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0a0015 0%, #000814 100%);
+        font-family: 'Inter', system-ui, sans-serif;
+        color: #e0e0ff;
+        overflow-x: hidden;
+        touch-action: manipulation;
+    }
+
+    #layout-wrapper {
+        display: none;
+        flex-direction: column;
+        min-height: 100vh;
+        padding-bottom: 20px;
+    }
+
+    #device-selector {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        background: #020205;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .bg-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.35;
+        filter: saturate(1.6) contrast(1.15) brightness(0.75);
+        z-index: -3;
+    }
+
+    .energy-grid {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(45deg, transparent 0 3px, rgba(0, 255, 220, 0.08) 3px 6px),
+                    repeating-linear-gradient(-45deg, transparent 0 3px, rgba(180, 0, 255, 0.06) 3px 6px);
+        background-size: 80px 80px;
+        animation: gridPulse 20s ease-in-out infinite alternate, flowEnergy 40s linear infinite;
+        opacity: 0.65;
+        mix-blend-mode: screen;
+    }
+
+    .glow-manta {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.14) 0%, rgba(180, 0, 255, 0.09) 45%, transparent 75%);
+        animation: breathe 16s ease-in-out infinite;
+        opacity: 0.55;
+    }
+
+    .selector-content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 4.5rem;
+        font-weight: 700;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+    }
+
+    .glitch-text {
+        color: #00d4ff;
+        text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+        animation: glitch 4s infinite;
+    }
+
+    .accent-text {
+        color: #ff00aa;
+        text-shadow: 0 0 10px #ff00aa;
+    }
+
+    .version-tag {
+        font-size: 14px;
+        color: #888;
+        margin-top: 10px;
+        letter-spacing: 2px;
+    }
+
+    .platform-grid {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .premium-btn {
+        background: rgba(0, 212, 255, 0.08);
+        border: 2px solid #00d4ff;
+        color: #e0f0ff;
+        padding: 30px 50px;
+        border-radius: 18px;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        min-width: 200px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(6px);
+    }
+
+    .premium-btn:hover {
+        background: linear-gradient(135deg, #00d4ff, #ff00aa);
+        color: #000;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 212, 255, 0.5);
+        border-color: transparent;
+    }
+
+    .premium-btn .icon { font-size: 3.5rem; margin-bottom: 12px; display: block; }
+    .premium-btn .label { font-size: 1.8rem; font-weight: 700; display: block; }
+    .premium-btn .desc { font-size: 1rem; opacity: 0.8; margin-top: 8px; display: block; }
+
+    .selector-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.8s ease, visibility 0.8s;
+    }
+
+    #header-signal {
+        background: rgba(10, 5, 25, 0.9);
+        backdrop-filter: blur(12px);
+        padding: 16px 12px;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        text-align: center;
+        position: relative;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    }
+
+    #signal-side {
+        font-family: 'Orbitron', monospace;
+        font-size: 42px;
+        font-weight: 700;
+        margin: 8px 0 4px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 20px rgba(0, 255, 136, 0.4), 0 0 40px rgba(0, 212, 255, 0.2);
+        min-height: 50px;
+    }
+
+    #wealth-monitor {
+        position: absolute;
+        top: 12px;
+        left: 16px;
+        text-align: left;
+    }
+
+    #equity-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #00ffaa;
+        text-shadow: 0 0 10px #00ffaa80;
+    }
+
+    #wealth-log {
+        font-size: 11px;
+        color: #88aaff;
+        margin-top: 4px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #v27-system-status {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        text-align: right;
+    }
+
+    #v27-version {
+        font-size: 10px;
+        color: #00d4ff;
+        background: rgba(0, 212, 255, 0.15);
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    #v27-regime-badge {
+        font-size: 11px;
+        margin-top: 6px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    #v27-regime-badge.trend { background: rgba(0, 255, 170, 0.2); color: #00ffaa; }
+    #v27-regime-badge.range { background: rgba(255, 180, 0, 0.2); color: #ffb400; }
+    #v27-regime-badge.high-vol { background: rgba(255, 159, 67, 0.2); color: #ff9f43; }
+    #v27-regime-badge.crisis { background: rgba(255, 77, 130, 0.2); color: #ff4d82; animation: pulse 1s infinite; }
+
+    #confluence-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 10px;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        flex-wrap: wrap;
+    }
+
+    .conf-pill {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 80px;
+    }
+
+    #v-label {
+        font-size: 13px;
+        color: #a0a0ff;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    #stretch-warning {
+        font-size: 14px;
+        margin-top: 8px;
+        font-weight: 500;
+        min-height: 20px;
+    }
+
+    .live-and-chart-row {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        margin: 12px 16px;
+        align-items: stretch;
+    }
+    #accuracy-chart-container {
+        background: rgba(15, 12, 35, 0.5);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 20px;
+        padding: 20px;
+        flex: 1 1 40%;
+        min-width: 0;
+        height: 300px;
+        display: block !important;
+        flex-direction: column;
+        position: relative; /* Indispensable para Chart.js */
+    }
+
+/* Agrega esto para forzar al canvas a usar el espacio */
+#accuracyChart {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+
+
+.sequence-dot {
+    transition: all 0.3s ease;
+}
+#live-sequence div {
+    flex-shrink: 0; /* Esto evita que las velas se aplasten */
+}
+
+    .vela:hover {
+        transform: scale(1.15) translateY(-4px);
+        filter: brightness(1.15);
+    }
+
+    .vela:not(.ultima) {
+        height: 28px;
+    }
+
+    .vela-compra {
+        background: linear-gradient(to top, #00ffaa, #00cc88);
+    }
+
+    .vela-venta {
+        background: linear-gradient(to top, #ff4d82, #d32f6b);
+    }
+
+    #seq-length {
+        font-size: 13px;
+        color: #a0a0ff;
+        margin-top: 10px;
+        text-align: right;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .v27-dashboard {
+        padding: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 15px;
+    }
+
+    .v27-panel {
+        background: rgba(20, 20, 40, 0.9);
+        border: 1px solid rgba(100, 100, 200, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(100, 100, 200, 0.2);
+    }
+
+    .panel-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #00d4ff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .panel-status {
+        font-size: 10px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .panel-status.live { background: rgba(0, 255, 136, 0.2); color: #00ffaa; animation: pulse 2s infinite; }
+    .panel-status.active { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+    .panel-status.safe { background: rgba(0, 255, 136, 0.2); color: #00ffaa; }
+    .panel-status.warning { background: rgba(255, 180, 0, 0.2); color: #ffb400; }
+    .panel-status.danger { background: rgba(255, 77, 130, 0.2); color: #ff4d82; animation: pulse 1s infinite; }
+
+    .indicators-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .indicator-card {
+        background: rgba(30, 30, 60, 0.6);
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 3px solid #666;
+        transition: all 0.3s ease;
+    }
+
+    .indicator-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 212, 255, 0.15); }
+    .indicator-card.bullish { border-left-color: #00ffaa; }
+    .indicator-card.bearish { border-left-color: #ff4d82; }
+    .indicator-card.neutral { border-left-color: #ffb400; }
+
+    .indicator-name { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .indicator-value { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+    .indicator-value.bullish { color: #00ffaa; }
+    .indicator-value.bearish { color: #ff4d82; }
+    .indicator-value.neutral { color: #ffb400; }
+
+    .indicator-bar { height: 4px; background: rgba(100, 100, 100, 0.3); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .bar-fill { height: 100%; background: #666; transition: width 0.3s ease; }
+    .bar-fill.bullish { background: #00ffaa; }
+    .bar-fill.bearish { background: #ff4d82; }
+    .bar-fill.overbought { background: #ff4d82; }
+    .bar-fill.oversold { background: #00ffaa; }
+
+    .indicator-signal { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+
+    .composite-signal {
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .composite-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .composite-value { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+    .composite-value.buy { color: #00ffaa; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+    .composite-value.sell { color: #ff4d82; text-shadow: 0 0 10px rgba(255, 77, 130, 0.5); }
+    .composite-value.neutral { color: #ffb400; }
+    .composite-score { font-size: 13px; color: #00d4ff; }
+
+    .ml-section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(100, 100, 200, 0.1); }
+    .ml-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .section-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+    .ensemble-prediction {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .pred-direction { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
+    .pred-direction.buy { color: #00ffaa; }
+    .pred-direction.sell { color: #ff4d82; }
+    .pred-direction.neutral { color: #ffb400; }
+
+    .pred-confidence { font-size: 16px; color: #00d4ff; margin-bottom: 5px; }
+    .pred-regime { font-size: 11px; color: #888; }
+
+    .model-weights { display: flex; flex-direction: column; gap: 8px; }
+    .weight-bar { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .model-name { width: 80px; color: #aaa; }
+    .weight-fill { flex: 1; height: 8px; background: rgba(100, 100, 100, 0.3); border-radius: 4px; overflow: hidden; position: relative; }
+    .weight-fill::after {
+        content: '';
+        display: block;
+        height: 100%;
+        width: var(--weight, 0%);
+        background: linear-gradient(90deg, #00d4ff, #00ffaa);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    .weight-pct { width: 40px; text-align: right; color: #00d4ff; font-weight: 600; }
+
+    .genetic-leader {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    #ai-best-match {
+        font-size: 14px;
+        color: #00d4ff;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    #ai-signal-value {
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 8px;
+        letter-spacing: 2px;
+    }
+
+    #ai-confidence {
+        font-size: 14px;
+        color: #888;
+    }
+
+    .genetic-windows {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .genetic-col { display: flex; flex-direction: column; gap: 6px; }
+    .col-header { font-size: 10px; color: #666; text-align: center; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px; }
+
+    .risk-gauges { display: flex; justify-content: space-around; margin-bottom: 20px; }
+    .risk-gauge { text-align: center; }
+    .gauge-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+    .gauge-circle { position: relative; width: 70px; height: 70px; margin: 0 auto; }
+    .gauge-circle svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .gauge-bg { fill: none; stroke: rgba(100, 100, 100, 0.2); stroke-width: 8; }
+    .gauge-fill {
+        fill: none;
+        stroke: #00ffaa;
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-dasharray: 220;
+        stroke-dashoffset: 220;
+        transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
+    }
+    .gauge-fill.warning { stroke: #ffb400; }
+    .gauge-fill.danger { stroke: #ff4d82; }
+    .gauge-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; }
+
+    .risk-checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(0, 0, 0, 0.2); border-radius: 6px; font-size: 12px; }
+    .check-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: rgba(0, 255, 136, 0.2); color: #00ffaa; border-radius: 50%; font-size: 12px; }
+    .check-icon.fail { background: rgba(255, 77, 130, 0.2); color: #ff4d82; }
+    .check-label { flex: 1; color: #aaa; }
+    .check-status { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+    .check-status.pass { color: #00ffaa; }
+    .check-status.fail { color: #ff4d82; }
+
+    .circuit-breaker-status {
+        background: rgba(0, 255, 136, 0.1);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 6px;
+        padding: 10px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .circuit-breaker-status.triggered {
+        background: rgba(255, 77, 130, 0.1);
+        border-color: rgba(255, 77, 130, 0.3);
+        color: #ff4d82;
+        animation: pulse 1s infinite;
+    }
+
+    .shield-status {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .shield-icon { font-size: 32px; }
+    .shield-info { flex: 1; }
+    .shield-state { font-size: 14px; font-weight: 700; }
+    .shield-state.active { color: #00ffaa; }
+    .shield-state.triggered { color: #ff4d82; animation: pulse 1s infinite; }
+    .shield-prob { font-size: 12px; color: #888; margin-top: 4px; }
+
+    .trap-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .trap-stat {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .trap-stat-label { font-size: 10px; color: #666; margin-bottom: 4px; }
+    .trap-stat-value { font-size: 16px; font-weight: 700; color: #00d4ff; }
+
+    #trap-last-seq {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: #888;
+        background: rgba(0,0,0,0.2);
+        padding: 8px;
+        border-radius: 4px;
+        word-break: break-all;
+    }
+
+    .action-section {
+        padding: 0 16px 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        max-width: 200px;
+        padding: 20px;
+        border: none;
+        border-radius: 12px;
+        font-family: 'Orbitron', monospace;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .action-btn:hover:not(:disabled) {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-buy {
+        background: linear-gradient(145deg, #00ffaa, #00cc88);
+        color: #000;
+    }
+
+    .btn-buy:hover:not(:disabled) { box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4); }
+
+    .btn-sell {
+        background: linear-gradient(145deg, #ff4d82, #d32f6b);
+        color: #fff;
+    }
+
+    .btn-sell:hover:not(:disabled) { box-shadow: 0 10px 30px rgba(255, 77, 130, 0.4); }
+
+    .btn-icon { font-size: 32px; }
+    .btn-text { font-size: 16px; }
+    .btn-size { font-size: 12px; opacity: 0.8; }
+
+    #bottom-controls {
+        background: rgba(15,10,35,0.6);
+        backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(100,180,255,0.2);
+        padding: 16px 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .control-card {
+        flex: 1 1 100px;
+        max-width: 170px;
+        padding: 14px 10px;
+        background: rgba(30,25,60,0.45);
+        border: 1px solid rgba(120,120,180,0.3);
+        border-radius: 14px;
+        color: #d0d0ff;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .control-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        border-color: rgba(0,212,255,0.5);
+    }
+
+    .control-card.active {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+
+    .control-card .btn-main { font-size: 13px; font-weight: 700; }
+    .control-card .btn-sub { font-size: 10px; opacity: 0.7; }
+
+    #toggle-reversal {
+        border-color: rgba(255, 0, 255, 0.3);
+    }
+
+    #toggle-reversal.active {
+        background: rgba(255, 0, 255, 0.2);
+        border-color: #ff00ff;
+    }
+
+    .v27-logs {
+        background: rgba(10, 10, 20, 0.9);
+        border-radius: 12px;
+        margin: 0 16px 20px;
+        padding: 15px;
+        max-height: 250px;
+        overflow: hidden;
+    }
+
+    .logs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(100, 100, 200, 0.2);
+    }
+
+    .logs-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4ff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .logs-actions { display: flex; gap: 8px; }
+
+    .log-btn {
+        padding: 6px 12px;
+        border: 1px solid rgba(100, 100, 200, 0.3);
+        background: transparent;
+        color: #888;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        transition: all 0.2s;
+    }
+
+    .log-btn:hover {
+        background: rgba(0, 212, 255, 0.2);
+        color: #00d4ff;
+        border-color: #00d4ff;
+    }
+
+    .logs-container {
+        height: 180px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .log-entry {
+        display: flex;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(100, 100, 100, 0.1);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-time { color: #666; min-width: 60px; }
+    .log-type {
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 9px;
+        font-weight: bold;
+        text-transform: uppercase;
+        min-width: 50px;
+        text-align: center;
+    }
+    .log-type-trade { background: rgba(0, 255, 136, 0.15); color: #00ffaa; }
+    .log-type-ml { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
+    .log-type-risk { background: rgba(255, 159, 67, 0.15); color: #ff9f43; }
+    .log-type-system { background: rgba(150, 150, 150, 0.15); color: #aaa; }
+    .log-type-trap { background: rgba(255, 77, 130, 0.15); color: #ff4d82; }
+    .log-msg { flex: 1; color: #ccc; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.5); }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    @keyframes gridPulse { 0%,100% { opacity:0.5; } 50% { opacity:0.85; } }
+    @keyframes flowEnergy { 0% { background-position:0 0, 0 0; } 100% { background-position:160px 160px, -120px -120px; } }
+    @keyframes breathe { 0%,100% { opacity:0.55; transform:scale(1); } 50% { opacity:0.95; transform:scale(1.12); } }
+    @keyframes glitch {
+        0%, 100% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+    }
+
+    @media (max-width: 900px) {
+        .live-and-chart-row { flex-direction: column; }
+        #sequence-live-panel, #accuracy-chart-container { flex: 1 1 100%; min-width: 100%; }
+        .v27-dashboard { grid-template-columns: 1fr; }
+        .indicators-grid { grid-template-columns: 1fr; }
+        .genetic-windows { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+        .cyber-title { font-size: 2.5rem; }
+        #signal-side { font-size: 28px; }
+        .premium-btn { padding: 20px 30px; min-width: 150px; }
+        .action-buttons { flex-direction: column; }
+        .action-btn { max-width: 100%; }
+        #bottom-controls { padding: 12px 8px; }
+        .control-card { flex: 1 1 calc(50% - 8px); max-width: none; }
+    }
+
+    .mobile-view .v27-dashboard { grid-template-columns: 1fr; }
+    .mobile-view .indicators-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .standby-panel {
+    border: 2px solid #ff4d82 !important;
+    background: rgba(255, 77, 130, 0.1) !important;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: rgba(255, 77, 130, 0.5); }
+    50% { border-color: rgba(255, 77, 130, 1); }
+}
+
+.standby-content {
+    text-align: center;
+    padding: 20px;
+}
+
+.standby-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.standby-message {
+    font-size: 16px;
+    color: #ff4d82;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 77, 130, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 77, 130, 0.3);
+}
+
+.standby-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 25px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.standby-details span {
+    color: #ff9f43;
+    font-weight: 600;
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.standby-reset-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(145deg, #00ffaa, #00cc88);
+    border: none;
+    border-radius: 12px;
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.standby-reset-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+}
+
+.standby-reset-btn .btn-icon {
+    font-size: 28px;
+}
+
+.standby-reset-btn .btn-text {
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.standby-reset-btn .btn-sub {
+    font-size: 10px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.standby-warning {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #ffb400;
+    padding: 10px;
+    background: rgba(255, 180, 0, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 180, 0, 0.3);
+}
+
+
+</style>
+
+
+</head>
+<body>
+
+<div id="device-selector">
+    <video autoplay muted loop playsinline class="bg-video">
+        <source src="background.mp4" type="video/mp4">
+    </video>
+    <div class="energy-grid"></div>
+    <div class="glow-manta"></div>
+
+    <div class="selector-content">
+        <div class="cyber-title">
+            <span class="glitch-text">QUANTUM</span>
+            <span class="accent-text">MACRO</span>
+            <div class="version-tag">V27 ULTIMATE UNIFIED</div>
+        </div>
+
+        <div class="platform-grid">
+            <button class="premium-btn" onclick="setPlatform('pc')">
+                <span class="icon">💻</span>
+                <span class="label">DESKTOP</span>
+                <span class="desc">Full Terminal V27</span>
+            </button>
+            <button class="premium-btn" onclick="setPlatform('mobile')">
+                <span class="icon">📱</span>
+                <span class="label">MOBILE</span>
+                <span class="desc">Adaptive Node V27</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="layout-wrapper">
+    
+    <div id="header-signal">
+        <div id="wealth-monitor">
+            <div id="equity-value">$1000.00</div>
+            <div id="wealth-log">QUANTUM V27 ACTIVO</div>
+        </div>
+        
+        <div id="v27-system-status">
+            <div id="v27-version">V27.0 ULTIMATE</div>
+            <div id="v27-regime-badge" class="stable">RÉGIMEN: ESTABLE</div>
+        </div>
+
+        <div id="signal-side">ESPERANDO DATOS</div>
+        
+       <div id="confluence-bar">
+           <div id="conf-buy" class="conf-pill" style="background:rgba(0,255,170,0.15); color:#00ffaa;">BUY: 0</div>
+           <div id="v-label">ASERTIVIDAD: 0% | RSI: -- | RACHA: 0</div>
+           <div id="conf-sell" class="conf-pill" style="background:rgba(255,77,130,0.15); color:#ff4d82;">SELL: 0</div>
+       </div>
+        
+        <div id="stretch-warning"></div>
+    </div>
+
+<div class="live-and-chart-row">
+    <div id="sequence-live-panel"> 
+        <strong>📊 COMPARATIVA QUANTUM V27</strong>
+        <div id="live-sequence"></div>
+        <div id="seq-length">Sincronizado</div>
+    </div>
+    <div class="v27-logs">
+        <div class="logs-header">
+            <span class="logs-title">📋 LOGS DEL SISTEMA</span>
+            <div class="logs-actions">
+                <button class="log-btn" onclick="MarketBridgeV27.exportData()">📥 Exportar CSV</button>
+                <button class="log-btn" onclick="clearLogs()">🗑️ Limpiar</button>
+            </div>
+        </div>
+        <div class="logs-container" id="log-lines">
+            <div class="log-entry">
+                <span class="log-time">--:--:--</span>
+                <span class="log-type log-type-system">SYSTEM</span>
+                <span class="log-msg">Quantum Macro V27 iniciado. Esperando datos...</span>
+            </div>
+        </div>
+    </div>
+    <div id="accuracy-chart-container">
+        <canvas id="accuracyChart"></canvas> 
+    </div>
+
+    
+</div>
+
+    <div class="v27-dashboard">
+        
+        <div class="v27-panel technical-panel">
+            <div class="panel-header">
+                <span class="panel-title">📊 INDICADORES TÉCNICOS</span>
+                <span class="panel-status live">LIVE</span>
+            </div>
+            
+            <div class="indicators-grid">
+                <div class="indicator-card" id="card-rsi">
+                    <div class="indicator-name">RSI (14)</div>
+                    <div class="indicator-value" id="v27-rsi">--</div>
+                    <div class="indicator-bar"><div class="bar-fill" id="rsi-bar" style="width: 50%"></div></div>
+                    <div class="indicator-signal" id="rsi-signal">NEUTRAL</div>
+                </div>
+                
+                <div class="indicator-card" id="card-macd">
+                    <div class="indicator-name">MACD</div>
+                    <div class="indicator-value" id="v27-macd">--</div>
+                    <div class="indicator-bar"><div class="bar-fill" id="macd-bar" style="width: 50%"></div></div>
+                    <div class="indicator-signal" id="macd-signal">NEUTRAL</div>
+                </div>
+                
+                <div class="indicator-card" id="card-bollinger">
+                    <div class="indicator-name">BOLLINGER %</div>
+                    <div class="indicator-value" id="v27-bb">--%</div>
+                    <div class="indicator-bar"><div class="bar-fill" id="bb-bar" style="width: 50%"></div></div>
+                    <div class="indicator-signal" id="bb-signal">NEUTRAL</div>
+                </div>
+                
+                <div class="indicator-card" id="card-streak">
+                    <div class="indicator-name">RACHA ACTUAL</div>
+                    <div class="indicator-value" id="v27-streak">--</div>
+                    <div class="indicator-bar"><div class="bar-fill" id="streak-bar" style="width: 0%"></div></div>
+                    <div class="indicator-signal" id="streak-signal">SIN RACHA</div>
+                </div>
+            </div>
+
+            <div class="composite-signal">
+                <div class="composite-label">SEÑAL TÉCNICA COMPUESTA</div>
+                <div class="composite-value" id="tech-composite">ANALIZANDO...</div>
+                <div class="composite-score" id="tech-momentum">Momentum: 0</div>
+            </div>
+        </div>
+
+        <div class="v27-panel ml-panel">
+            <div class="panel-header">
+                <span class="panel-title">🧠 ML ENSEMBLE</span>
+                <span class="panel-status active" id="ml-status">ACTIVE</span>
+            </div>
+            
+            <div class="ml-section">
+                <div class="section-title">Predicción LSTM</div>
+                <div class="ensemble-prediction">
+                    <div class="pred-direction" id="ml-direction">--</div>
+                    <div class="pred-confidence" id="ml-confidence">0%</div>
+                    <div class="pred-regime" id="ml-regime">Estado: Esperando datos</div>
+                </div>
+            </div>
+
+            <div class="ml-section">
+                <div class="section-title">Pesos de Modelos</div>
+                <div class="model-weights">
+                    <div class="weight-bar">
+                        <span class="model-name">LSTM</span>
+                        <div class="weight-fill" id="weight-lstm" style="--weight: 70%"></div>
+                        <span class="weight-pct" id="pct-lstm">70%</span>
+                    </div>
+                    <div class="weight-bar">
+                        <span class="model-name">TRAP-DETECT</span>
+                        <div class="weight-fill" id="weight-trap" style="--weight: 30%"></div>
+                        <span class="weight-pct" id="pct-trap">30%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ml-section">
+                <div class="section-title">Estadísticas ML</div>
+                <div class="pipeline-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div class="stat">
+                        <span class="stat-label">Exactitud</span>
+                        <span class="stat-value" id="ml-accuracy">--</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Ventana</span>
+                        <span class="stat-value" id="ml-window">30</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Épocas</span>
+                        <span class="stat-value" id="ml-epochs">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="v27-panel genetic-panel">
+            <div class="panel-header">
+                <span class="panel-title">🧬 ANÁLISIS GENÉTICO</span>
+                <span class="panel-status active" id="genetic-status">ACTIVE</span>
+            </div>
+            
+            <div class="genetic-leader">
+                <div id="ai-best-match">PATRON LÍDER: V--</div>
+                <div id="ai-signal-value" style="color: #888;">ESPERANDO</div>
+                <div id="ai-confidence">0% CONFIANZA</div>
+            </div>
+
+            <div class="section-title" style="margin-bottom: 8px;">Ventanas Genéticas (V3-V20)</div>
+            <div class="genetic-windows" id="genetic-windows">
+                <div class="genetic-col" id="col-low">
+                    <div class="col-header">BAJA CONFIANZA</div>
+                    <div class="windows-container"></div>
+                </div>
+                <div class="genetic-col" id="col-mid">
+                    <div class="col-header">MEDIA CONFIANZA</div>
+                    <div class="windows-container"></div>
+                </div>
+                <div class="genetic-col" id="col-high">
+                    <div class="col-header">ALTA CONFIANZA</div>
+                    <div class="windows-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="v27-panel risk-panel">
+            <div class="panel-header">
+                <span class="panel-title">⚠️ GESTIÓN DE RIESGO</span>
+                <span class="panel-status safe" id="risk-status">SAFE</span>
+            </div>
+            
+            <div class="risk-gauges">
+                <div class="risk-gauge">
+                    <div class="gauge-label">Volatilidad</div>
+                    <div class="gauge-circle">
+                        <svg viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="35"></circle>
+                            <circle class="gauge-fill" id="vol-gauge" cx="40" cy="40" r="35" style="stroke-dashoffset: 220;"></circle>
+                        </svg>
+                        <div class="gauge-value" id="vol-value">0%</div>
+                    </div>
+                </div>
+                <div class="risk-gauge">
+                    <div class="gauge-label">Drawdown</div>
+                    <div class="gauge-circle">
+                        <svg viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="35"></circle>
+                            <circle class="gauge-fill" id="dd-gauge" cx="40" cy="40" r="35" style="stroke-dashoffset: 220;"></circle>
+                        </svg>
+                        <div class="gauge-value" id="dd-value">0%</div>
+                    </div>
+                </div>
+                <div class="risk-gauge">
+                    <div class="gauge-label">Risk/Reward</div>
+                    <div class="gauge-circle">
+                        <svg viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="35"></circle>
+                            <circle class="gauge-fill" id="rr-gauge" cx="40" cy="40" r="35" style="stroke-dashoffset: 110;"></circle>
+                        </svg>
+                        <div class="gauge-value" id="rr-value">0.85</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="risk-checks">
+                <div class="check-item">
+                    <div class="check-icon" id="check-vol">✓</div>
+                    <span class="check-label">Volatilidad Aceptable</span>
+                    <span class="check-status pass" id="status-vol">PASS</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon" id="check-streak">✓</div>
+                    <span class="check-label">Racha No Extrema</span>
+                    <span class="check-status pass" id="status-streak">PASS</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon" id="check-trap">✓</div>
+                    <span class="check-label">Sin Trampas Detectadas</span>
+                    <span class="check-status pass" id="status-trap">PASS</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon" id="check-time">✓</div>
+                    <span class="check-label">Horario Seguro</span>
+                    <span class="check-status pass" id="status-time">PASS</span>
+                </div>
+            </div>
+
+            <div class="circuit-breaker-status" id="circuit-breaker">
+                <span class="cb-icon">🛡️</span>
+                <span class="cb-text">CIRCUIT BREAKER: INACTIVO</span>
+            </div>
+        </div>
+
+        <div class="v27-panel trap-panel">
+            <div class="panel-header">
+                <span class="panel-title">🛡️ DETECTOR DE TRAMPAS</span>
+                <span class="panel-status active" id="trap-status">ACTIVE</span>
+                
+                    <!-- Agregar dentro del panel de trampas (trap-panel) o como panel separado -->
+                    <div class="v27-panel standby-panel" id="standby-panel" style="display: none;">
+                        <div class="panel-header">
+                            <span class="panel-title">🔒 SISTEMA EN STANDBY</span>
+                            <span class="panel-status danger">MANUAL RESET REQUERIDO</span>
+                        </div>
+                        
+                        <div class="standby-content">
+                            <div class="standby-icon">⚠️</div>
+                            <div class="standby-message" id="standby-reason">
+                                Escudo detectó trampa crítica. Sistema bloqueado para protección.
+                            </div>
+                            
+                            <div class="standby-details" id="standby-details">
+                                <div>Confianza de trampa: <span id="standby-confidence">0%</span></div>
+                                <div>Trampas consecutivas: <span id="standby-consecutive">0</span></div>
+                                <div>Hora de detección: <span id="standby-time">--:--:--</span></div>
+                            </div>
+                            
+                            <button class="standby-reset-btn" id="manual-reset-btn" onclick="MarketBridgeV27.manualShieldReset()">
+                                <span class="btn-icon">🛡️</span>
+                                <span class="btn-text">REACTIVAR ESCUDO MANUALMENTE</span>
+                                <span class="btn-sub">Confirmo que revisé la situación</span>
+                            </button>
+                            
+                            <div class="standby-warning">
+                                ⚡ Al reactivar, el sistema restaurará operaciones con precaución aumentada
+                            </div>
+                        </div>
+                    </div>
+
+            </div>
+            
+            <div class="shield-status">
+                <span class="shield-icon" id="shield-icon">🛡️</span>
+                <div class="shield-info">
+                    <div class="shield-state active" id="shield-state">ESCUDO ACTIVO</div>
+                    <div class="shield-prob" id="shield-prob">Prob. Trampa: 0%</div>
+                </div>
+            </div>
+
+            <div class="trap-stats">
+                <div class="trap-stat">
+                    <div class="trap-stat-label">Trampas Detectadas</div>
+                    <div class="trap-stat-value" id="trap-count">0</div>
+                </div>
+                <div class="trap-stat">
+                    <div class="trap-stat-label">Evitadas</div>
+                    <div class="trap-stat-value" id="trap-avoided">0</div>
+                </div>
+                <div class="trap-stat">
+                    <div class="trap-stat-label">Umbral Dinámico</div>
+                    <div class="trap-stat-value" id="trap-threshold">0.65</div>
+                </div>
+                <div class="trap-stat">
+                    <div class="trap-stat-label">Tasa Éxito Inv.</div>
+                    <div class="trap-stat-value" id="trap-success">--</div>
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-bottom: 5px;">Última Secuencia de Trampa</div>
+            <div id="trap-last-seq">---</div>
+        </div>
+    </div>
+
+    <div class="action-section">
+        <div class="action-buttons">
+            <button class="action-btn btn-buy" id="v27-buy">
+                <span class="btn-icon">📈</span>
+                <span class="btn-text">BUY</span>
+                <span class="btn-size">Stake: $<span id="stake-buy">10</span></span>
+            </button>
+            
+            <button class="action-btn btn-sell" id="v27-sell">
+                <span class="btn-icon">📉</span>
+                <span class="btn-text">SELL</span>
+                <span class="btn-size">Stake: $<span id="stake-sell">10</span></span>
+            </button>
+        </div>
+    </div>
+
+
+
+    <div id="bottom-controls">
+        <div class="control-card" id="toggle-reversal" onclick="MarketBridgeV27.toggleReversal()">
+            <span class="btn-main">REVERSIÓN</span>
+            <span class="btn-sub" id="rev-status">OFF (MANUAL)</span>
+        </div>
+        <div class="control-card" id="toggle-trap-mechanism" onclick="MarketBridgeV27.toggleTrapMechanism()">
+            <span class="btn-main">TRAMPAS</span>
+            <span class="btn-sub">ACTIVADO</span>
+        </div>
+        <div class="control-card" id="toggle-hedge-fund" onclick="MarketBridgeV27.toggleHedgeFund()">
+            <span class="btn-main">HEDGE FUND</span>
+            <span class="btn-sub">DESACTIVADO</span>
+        </div>
+        <div class="control-card" id="toggle-po-connection" onclick="MarketBridgeV27.togglePOConnection()">
+            <span class="btn-main">PO SOCKET</span>
+            <span class="btn-sub" id="po-status">OFFLINE</span>
+        </div>
+        <div class="control-card" onclick="MarketBridgeV27.reset()">
+            <span class="btn-main">RESET</span>
+            <span class="btn-sub">Sistema</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let accuracyChart = null;
+
+function initChart() {
+    const canvas = document.getElementById('accuracyChart');
+    if (!canvas) {
+        console.error('Canvas accuracyChart no encontrado');
+        return;
+    }
+    
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('No se pudo obtener contexto 2D');
+        return;
+    }
+    
+    accuracyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Precisión Global',
+                    data: [],
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.15)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#00d4ff',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1,
+                    order: 1
+                },
+                {
+                    label: 'Media Móvil (10)',
+                    data: [],
+                    borderColor: '#ffffff',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [8, 4],
+                    pointRadius: 0,
+                    tension: 0.4,
+                    order: 2
+                },
+                {
+                    label: 'Volatilidad',
+                    data: [],
+                    borderColor: '#ff9f43',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    tension: 0.4,
+                    yAxisID: 'y1',
+                    order: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { 
+                    display: true,
+                    labels: { 
+                        color: '#aaa', 
+                        font: { size: 11 },
+                        usePointStyle: true,
+                        padding: 15
+                    } 
+                },
+                annotation: {
+                    annotations: {
+                        lineOptima: {
+                            type: 'line',
+                            yMin: 75,
+                            yMax: 75,
+                            borderColor: '#00ffaa',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                display: true,
+                                content: '✓ ÓPTIMO 75%',
+                                position: 'end',
+                                backgroundColor: 'rgba(0, 255, 170, 0.9)',
+                                color: '#000',
+                                font: { size: 10, weight: 'bold' },
+                                xAdjust: -10
+                            }
+                        },
+                        lineMinima: {
+                            type: 'line',
+                            yMin: 60,
+                            yMax: 60,
+                            borderColor: '#ff4d82',
+                            borderWidth: 3,
+                            borderDash: [10, 5],
+                            label: {
+                                display: true,
+                                content: '🚫 MÍNIMO 60%',
+                                position: 'start',
+                                backgroundColor: 'rgba(255, 77, 130, 0.9)',
+                                color: '#fff',
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        },
+                        lineAzar: {
+                            type: 'line',
+                            yMin: 50,
+                            yMax: 50,
+                            borderColor: '#ffb400',
+                            borderWidth: 1,
+                            borderDash: [3, 3],
+                            label: {
+                                display: true,
+                                content: '⚠️ AZAR 50%',
+                                position: 'center',
+                                backgroundColor: 'rgba(255, 180, 0, 0.8)',
+                                color: '#000',
+                                font: { size: 9 }
+                            }
+                        },
+                        boxOptima: {
+                            type: 'box',
+                            yMin: 75,
+                            yMax: 100,
+                            backgroundColor: 'rgba(0, 255, 170, 0.08)',
+                            borderWidth: 0
+                        },
+                        boxPeligro: {
+                            type: 'box',
+                            yMin: 0,
+                            yMax: 60,
+                            backgroundColor: 'rgba(255, 77, 130, 0.08)',
+                            borderWidth: 0
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(10, 10, 25, 0.95)',
+                    titleColor: '#00d4ff',
+                    bodyColor: '#fff',
+                    borderColor: '#00d4ff',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(1) + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    display: true,
+                    grid: { 
+                        color: 'rgba(100,100,100,0.08)',
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        color: '#666', 
+                        maxTicksLimit: 6,
+                        font: { size: 10 }
+                    }
+                },
+                y: {
+                    min: 30,
+                    max: 100,
+                    grid: { 
+                        color: 'rgba(100,100,100,0.1)',
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        color: '#00d4ff',
+                        callback: function(value) { return value.toFixed(0) + '%'; },
+                        font: { size: 10 }
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    min: 0,
+                    max: 50,
+                    grid: { display: false },
+                    ticks: { 
+                        color: '#ff9f43', 
+                        font: { size: 9 },
+                        callback: function(value) { return value.toFixed(0); }
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('✅ Chart avanzado con zonas y medias inicializado');
+}
+
+// FUNCIÓN GLOBAL - Será usada por market_bridge_core.js
+window.updateAccuracyChart = function(accuracy, volatility) {
+    if (!accuracyChart) {
+        console.warn('Chart no inicializado aún');
+        return;
+    }
+    
+    // Si no hay datos todavía, ponemos 0 para que el gráfico no se rompa
+    const cleanAcc = isNaN(accuracy) ? 0 : accuracy * 100; // Convertir a porcentaje
+    const cleanVol = isNaN(volatility) ? 0 : volatility;
+    
+    const now = new Date().toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Agregar datos
+    accuracyChart.data.labels.push(now);
+    accuracyChart.data.datasets[0].data.push(cleanAcc);
+    accuracyChart.data.datasets[2].data.push(cleanVol);
+    
+    // Calcular media móvil de 10 períodos
+    const accData = accuracyChart.data.datasets[0].data;
+    let sma = cleanAcc;
+    if (accData.length >= 10) {
+        const last10 = accData.slice(-10);
+        sma = last10.reduce((a, b) => a + b, 0) / 10;
+    }
+    accuracyChart.data.datasets[1].data.push(sma);
+    
+    // Mantener últimos 30 puntos
+    if (accuracyChart.data.labels.length > 30) {
+        accuracyChart.data.labels.shift();
+        accuracyChart.data.datasets.forEach(ds => ds.data.shift());
+    }
+    
+    // Cambiar color según zona
+    const dataset = accuracyChart.data.datasets[0];
+    if (cleanAcc >= 75) {
+        dataset.borderColor = '#00ffaa';
+        dataset.backgroundColor = 'rgba(0, 255, 170, 0.15)';
+    } else if (cleanAcc >= 60) {
+        dataset.borderColor = '#ffb400';
+        dataset.backgroundColor = 'rgba(255, 180, 0, 0.15)';
+    } else {
+        dataset.borderColor = '#ff4d82';
+        dataset.backgroundColor = 'rgba(255, 77, 130, 0.15)';
+    }
+    
+    accuracyChart.update('none');
+};
+
+function clearLogs() {
+    const logLines = document.getElementById('log-lines');
+    if (logLines) {
+        logLines.innerHTML = '';
+        if (window.MarketBridgeV27) {
+            MarketBridgeV27.addLog('Logs limpiados', '#888', 'system');
+        }
+    }
+}
+
+// Prevenir menú contextual en área de secuencia
+document.addEventListener('contextmenu', e => {
+    if (e.target.closest('#sequence-live-panel') || e.target.closest('#live-sequence')) {
+        e.preventDefault();
+    }
+});
+
+
+</script>
+<script src="market_1-5.js"></script>
+<script src="market_2-5.js"></script>
+<script src="market_3-5.js"></script>
+<script src="market_4-5.js"></script>
+<script src="market_5-5.js"></script>
+<script src="chart_engine_v27_pro.js"></script>
+<script src="accordion_v27.js"></script>
+    <script src="quantum_integration_v27.js"></script>       
+    <script src="market_bridge_core.js"></script>
+
+<link rel="stylesheet" href="accordion_styles_v27.css">
+
+
+<!-- QUANTUM MACRO V27 PANEL - Agregar antes de cerrar </body> -->
+<script>
+// Forzar inicialización del panel Macro si no aparece
+function initMacroPanel() {
+    console.log('[MacroPanel] Verificando inicialización...');
+    
+    // Verificar si ya existe
+    if (document.getElementById('macro-dashboard')) {
+        console.log('[MacroPanel] Ya existe');
+        return;
+    }
+    
+    // Verificar dependencias
+    if (!window.MacroV27 || !window.MacroV27.engine) {
+        console.log('[MacroPanel] Esperando MacroV27...');
+        setTimeout(initMacroPanel, 500);
+        return;
+    }
+    
+    console.log('[MacroPanel] Creando panel...');
+    
+    // Crear el panel directamente
+    const panel = document.createElement('div');
+    panel.id = 'macro-dashboard';
+    panel.className = 'v27-panel macro-panel';
+    panel.style.cssText = `
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, rgba(10,10,30,0.98), rgba(20,10,40,0.95));
+        border: 2px solid rgba(0,212,255,0.4);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 0 16px 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        backdrop-filter: blur(10px);
+        order: -1;
+    `;
+    
+    panel.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(0,212,255,0.2);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-family: 'Orbitron', monospace; font-size: 16px; color: #00d4ff; font-weight: 700;">
+                    ⚛️ QUANTUM MACRO V27
+                </span>
+                <span id="macro-regime-badge" style="
+                    padding: 6px 12px;
+                    background: rgba(100,100,100,0.3);
+                    border-radius: 20px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    color: #888;
+                ">ANALIZANDO</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span id="macro-confidence" style="font-size: 24px; font-weight: 700; color: #ffb400;">--%</span>
+                <span style="font-size: 11px; color: #888;">CONFIANZA</span>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+            <!-- Order Flow -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; border-left: 3px solid #00d4ff;">
+                <div style="font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 8px;">Order Flow</div>
+                <div id="macro-delta" style="font-size: 28px; font-weight: 700; color: #00d4ff; margin-bottom: 5px;">0</div>
+                <div id="macro-imbalances" style="font-size: 11px; color: #888;">Sin desequilibrios</div>
+            </div>
+            
+            <!-- Volume Profile -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; border-left: 3px solid #ff00aa;">
+                <div style="font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 8px;">Volume Profile</div>
+                <div id="macro-poc" style="font-size: 20px; font-weight: 700; color: #ff00aa; margin-bottom: 5px;">--</div>
+                <div id="macro-va" style="font-size: 11px; color: #888;">VA: -- / --</div>
+                <div id="macro-position" style="margin-top: 8px; font-size: 10px; color: #00ffaa;">Posición: --</div>
+            </div>
+            
+            <!-- Institucional -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; border-left: 3px solid #00ffaa;">
+                <div style="font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 8px;">Flujo Institucional</div>
+                <div id="macro-smart-money" style="font-size: 28px; font-weight: 700; color: #00ffaa; margin-bottom: 5px;">50</div>
+                <div id="macro-accumulation" style="font-size: 11px; color: #888;">Acc: --% | Dist: --%</div>
+                <div id="macro-cta" style="margin-top: 8px; font-size: 10px; color: #00d4ff;">CTA: NEUTRAL</div>
+            </div>
+            
+            <!-- Señal Principal -->
+            <div style="background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,255,170,0.1)); border-radius: 12px; padding: 15px; border: 2px solid rgba(0,212,255,0.3); text-align: center;">
+                <div style="font-size: 10px; color: #00d4ff; text-transform: uppercase; margin-bottom: 8px;">Señal Macro</div>
+                <div id="macro-signal" style="font-size: 24px; font-weight: 900; color: #ffb400; margin-bottom: 5px; letter-spacing: 1px;">ESPERAR</div>
+                <div id="macro-urgency" style="font-size: 11px; color: #888;">Urgencia: BAJA</div>
+                <div id="macro-horizon" style="margin-top: 8px; font-size: 10px; color: #ff00aa;">Horizonte: --</div>
+            </div>
+        </div>
+        
+        <!-- Barra de Confluencia -->
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+            <div style="font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 8px;">Confluencia de Señales</div>
+            <div id="macro-confluence-bars" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <span style="padding: 4px 8px; background: rgba(100,100,100,0.2); border-radius: 4px; font-size: 10px; color: #666;">Esperando datos...</span>
+            </div>
+        </div>
+        
+        <!-- Recomendación -->
+        <div style="background: linear-gradient(90deg, rgba(0,0,0,0.4), rgba(0,212,255,0.05)); border-radius: 12px; padding: 15px; border-left: 4px solid #ffb400;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 10px; color: #ffb400; text-transform: uppercase; margin-bottom: 6px;">Recomendación de Trading</div>
+                    <div id="macro-rationale" style="font-size: 13px; color: #e0e0ff; line-height: 1.4;">Inicializando análisis macro...</div>
+                </div>
+                <div id="macro-expected-move" style="text-align: right;">
+                    <div style="font-size: 11px; color: #888;">Movimiento Esperado</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #00ffaa;">--</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insertar al inicio del dashboard
+    const dashboard = document.querySelector('.v27-dashboard');
+    if (dashboard) {
+        dashboard.insertBefore(panel, dashboard.firstChild);
+        console.log('[MacroPanel] Panel insertado en dashboard');
+        
+        // Conectar con el engine
+        if (window.MacroV27 && window.MacroV27.dashboard) {
+            window.MacroV27.dashboard.container = panel;
+            window.MacroV27.dashboard.update = function(analysis) {
+                // Implementación de actualización inline
+                if (!analysis) return;
+                
+                const regimeBadge = document.getElementById('macro-regime-badge');
+                if (regimeBadge && analysis.regime) {
+                    const colors = {
+                        'TREND_UP': { bg: 'rgba(0,255,170,0.2)', color: '#00ffaa', text: 'TENDENCIA ALCISTA' },
+                        'TREND_DOWN': { bg: 'rgba(255,77,130,0.2)', color: '#ff4d82', text: 'TENDENCIA BAJISTA' },
+                        'RANGE': { bg: 'rgba(255,180,0,0.2)', color: '#ffb400', text: 'RANGO' },
+                        'HIGH_VOL': { bg: 'rgba(255,159,67,0.2)', color: '#ff9f43', text: 'ALTA VOLATILIDAD' },
+                        'CRISIS': { bg: 'rgba(255,0,0,0.3)', color: '#ff0000', text: 'CRISIS' }
+                    };
+                    const style = colors[analysis.regime.type] || colors['RANGE'];
+                    regimeBadge.style.background = style.bg;
+                    regimeBadge.style.color = style.color;
+                    regimeBadge.textContent = style.text;
+                }
+                
+                const confEl = document.getElementById('macro-confidence');
+                if (confEl && analysis.signal) {
+                    confEl.textContent = analysis.signal.confidence + '%';
+                    confEl.style.color = analysis.signal.confidence > 70 ? '#00ffaa' : 
+                                        analysis.signal.confidence > 50 ? '#ffb400' : '#ff4d82';
+                }
+                
+                const deltaEl = document.getElementById('macro-delta');
+                if (deltaEl && analysis.orderFlow) {
+                    const delta = analysis.orderFlow.cumulativeDelta;
+                    deltaEl.textContent = delta > 0 ? '+' + delta.toFixed(0) : delta.toFixed(0);
+                    deltaEl.style.color = delta > 0 ? '#00ffaa' : delta < 0 ? '#ff4d82' : '#888';
+                }
+                
+                const pocEl = document.getElementById('macro-poc');
+                if (pocEl && analysis.volumeProfile) {
+                    pocEl.textContent = analysis.volumeProfile.poc?.toFixed(2) || '--';
+                }
+                
+                const sigEl = document.getElementById('macro-signal');
+                if (sigEl && analysis.signal) {
+                    sigEl.textContent = analysis.signal.primary.replace('_', ' ');
+                    sigEl.style.color = analysis.signal.primary.includes('BUY') ? '#00ffaa' :
+                                       analysis.signal.primary.includes('SELL') ? '#ff4d82' : '#ffb400';
+                }
+            };
+        }
+    } else {
+        // Si no hay dashboard, insertar después del header
+        const header = document.getElementById('header-signal');
+        if (header) {
+            header.parentNode.insertBefore(panel, header.nextSibling);
+            console.log('[MacroPanel] Panel insertado después del header');
+        }
+    }
+}
+
+// Iniciar cuando todo cargue
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initMacroPanel, 2000));
+} else {
+    setTimeout(initMacroPanel, 2000);
+}
+</script>
+
+</body>
+</html>

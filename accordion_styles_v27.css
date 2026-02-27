@@ -1,0 +1,173 @@
+/* ============================================
+   ESTILOS DE ACORDEÓN DINÁMICO V27
+   ============================================ */
+
+/* Contenedor principal ajustable */
+.v27-dashboard {
+    display: flex;
+    flex-direction: column; /* Cambiado a columna para que todo se apile verticalmente */
+    gap: 10px; /* Menos espacio entre paneles */
+    align-items: stretch; /* Ocupan todo el ancho disponible */
+    transition: all 0.4s ease;
+    height: auto;
+    min-height: 0;
+}
+
+/* Panel base con transiciones suaves */
+.v27-panel {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: max-height, flex, opacity;
+    overflow: hidden;
+    position: relative;
+    width: 100%; /* Siempre ocupa todo el ancho */
+}
+
+/* Cuando colapsado: headers apilados verticalmente, muy compactos */
+.v27-panel[data-collapsed="true"] {
+    flex: 0 0 auto !important;
+    max-height: 50px !important; /* Muy delgado: solo header */
+    min-height: auto !important;
+    opacity: 0.9;
+    cursor: pointer;
+    margin-bottom: 4px; /* Espacio mínimo entre headers colapsados */
+}
+
+/* Header del panel - siempre visible y clickeable */
+.panel-header {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    background: inherit;
+    border-radius: inherit;
+    transition: background-color 0.3s ease;
+    padding: 10px 15px; /* Espacio interno más compacto */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px; /* Texto más pequeño para ahorrar espacio */
+}
+
+/* Indicador de acordeón más pequeño y discreto */
+.accordion-indicator {
+    min-width: 20px;
+    height: 20px;
+    font-size: 12px;
+}
+
+/* Contenido oculto cuando colapsado */
+.v27-panel[data-collapsed="true"] .panel-content-wrapper {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    max-height: 0;
+    overflow: hidden;
+}
+
+/* Panel expandido: ocupa todo el espacio disponible */
+.v27-panel[data-collapsed="false"],
+.v27-panel:not([data-collapsed]) {
+    flex: 1 1 auto;
+    max-height: none;
+    opacity: 1;
+}
+
+/* Ajustes para chart (más ancho cuando otros están colapsados) */
+.chart-panel {
+    flex: 1 1 100% !important; /* Siempre ocupa todo el ancho disponible */
+    min-height: 400px; /* Altura mínima para que se vea bien */
+}
+
+/* Cuando hay paneles colapsados arriba, el chart se expande abajo */
+.v27-dashboard .v27-panel[data-collapsed="true"] + .chart-panel {
+    margin-top: auto; /* Empuja el chart hacia abajo si hay headers arriba */
+}
+
+/* Responsive: en móvil todo vertical (ya lo tenías) */
+@media (max-width: 900px) {
+    .v27-dashboard {
+        flex-direction: column !important;
+    }
+}
+
+/* Tooltip informativo al hover del header */
+.panel-header:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #00d4ff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.panel-header:hover::before {
+    opacity: 1;
+}
+
+/* Optimización de rendimiento */
+.v27-panel {
+    contain: layout style;
+}
+
+.v27-panel[data-collapsed="true"] {
+    contain: strict;
+}
+/* ============================================
+   AJUSTES ESPECIALES PARA ADN MANUAL (SECuencia TU) - SIEMPRE VISIBLE
+   ============================================ */
+
+/* Panel del ADN manual / secuencia TU - siempre visible y con prioridad */
+#sequence-live-panel, 
+#live-sequence, 
+.sequence-panel, 
+.adn-manual-panel {  /* Usa la clase o ID real de tu panel del ADN manual */
+    flex: 1 1 auto !important; /* Siempre se expande */
+    min-height: 300px !important; /* Altura mínima para que se vea bien */
+    order: -1 !important; /* Lo pone AL INICIO (arriba) en el flujo vertical */
+    margin-bottom: 15px !important; /* Espacio debajo para separar del resto */
+}
+
+/* Forzar expansión en móvil o pantallas angostas */
+@media (max-width: 900px) {
+    #sequence-live-panel, 
+    #live-sequence, 
+    .sequence-panel, 
+    .adn-manual-panel {
+        max-height: none !important; /* No permitir colapso total */
+        min-height: 400px !important; /* Más alto en móvil */
+        overflow-y: auto !important; /* Scroll interno si hay mucho contenido */
+        flex: 1 1 100% !important;
+    }
+    
+    /* Ocultar o comprimir otros paneles no esenciales en móvil */
+    .v27-panel:not(#sequence-live-panel):not(#live-sequence):not(.sequence-panel):not(.adn-manual-panel) {
+        max-height: 60px !important; /* Otros paneles se colapsan más */
+    }
+}
+
+/* Asegurar que el contenido del ADN manual tenga scroll si es largo */
+.sequence-content, .adn-manual-content, #live-sequence .panel-content-wrapper {
+    overflow-y: auto !important;
+    max-height: 80vh; /* Máximo 80% de la pantalla */
+    padding: 10px;
+}
+
+/* Header del ADN manual siempre visible y destacado */
+#sequence-live-panel .panel-header,
+#live-sequence .panel-header,
+.sequence-panel .panel-header,
+.adn-manual-panel .panel-header {
+    background: rgba(0, 212, 255, 0.15) !important; /* Fondo azul sutil para destacar */
+    font-weight: bold;
+    border-bottom: 2px solid #00d4ff;
+}
